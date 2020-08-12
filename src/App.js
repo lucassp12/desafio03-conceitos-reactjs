@@ -7,22 +7,34 @@ function App() {
   const [repositories, setRepositories] = useState([]);
 
   useEffect(() => {
-    api.get("/repositories").then((response) => {
-      setRepositories(response.data);
-    });
+    async function loadData(){
+      const response = await  api.get("/repositories");
+
+      const loadedRepositories = response.data;
+      setRepositories(loadedRepositories)
+    }
+    loadData();
   }, [repositories]);
 
   async function handleAddRepository() {
-    const repository = {
+    const newRepository = {
       title: "New Repository",
       url: "www.github.com",
       techs: ["Node.js", "React.js"]
     };
-    await api.post("/repositories", repository);
-  }
+    const response = await api.post("/repositories", newRepository);
 
+    if(response.status === '201'){
+      setRepositories([...repositories, newRepository]);
+    }
+  }
   async function handleRemoveRepository(id) {
-   await api.delete(`/repositories/${id}`);
+  const response = await api.delete(`/repositories/${id}`);
+
+  if(response.status === '204' ){
+    const filtredRepositories = repositories.filter(repository => repository.id !== id);
+    setRepositories(filtredRepositories);
+  }
   }
 
   return (
